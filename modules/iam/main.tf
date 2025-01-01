@@ -16,7 +16,7 @@ POLICY
 
   description           = "Allows Lambda functions to call AWS services on your behalf."
   max_session_duration = "3600"
-  name                 = "${var.project_name}-ApiRequestLambdaRole"
+  name                 = "ApiRequestLambdaRole"
   path                 = "/"
 
   inline_policy {
@@ -36,7 +36,7 @@ POLICY
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/${var.project_name}-*"
+            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/*" # Come back to this
           ],
           "Sid" : "DynamoDBAccess"
         }
@@ -83,7 +83,7 @@ POLICY
 
   description           = "Allows Lambda functions to call AWS services on your behalf."
   max_session_duration = "3600"
-  name                 = "${var.project_name}-LambdaScraperAnalysisRole"
+  name                 = "LambdaScraperAnalysisRole"
   path                 = "/"
 
   inline_policy {
@@ -168,7 +168,7 @@ POLICY
 
   description           = "Allows Lambda functions to call AWS services on your behalf."
   max_session_duration = "3600"
-  name                 = "${var.project_name}-LambdaScraperRole"
+  name                 = "LambdaScraperRole"
   path                 = "/"
 
   inline_policy {
