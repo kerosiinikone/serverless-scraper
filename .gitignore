@@ -3,3 +3,5 @@ fetch
 cert.cer
 .env
 proxy.txt
+
+generated

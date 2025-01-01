@@ -6,9 +6,9 @@ import (
 
 	"github.com/anthdm/hollywood/actor"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/kerosiinikone/scraper-lambda-poc/pkg/models"
 	s3storage "github.com/kerosiinikone/serverless-scraper/infra/blob"
 	"github.com/kerosiinikone/serverless-scraper/internal/scraper"
+	"github.com/kerosiinikone/serverless-scraper/pkg/models"
 )
 
 type Manager struct {

@@ -15,7 +15,17 @@ var proxyData []byte
 
 var proxies []string
 
-func LoadProxies() []string {
+func Proxy() (func(*http.Request) (*url.URL, error), error) {
+	proxies := loadProxies()
+	p := proxies[rand.Intn(len(proxies))]
+	proxyUrl, err := url.Parse(p)
+	if err != nil {
+		return nil, err
+	}
+	return http.ProxyURL(proxyUrl), nil
+}
+
+func loadProxies() []string {
 	if len(proxies) != 0 {
 		return proxies
 	}
@@ -24,14 +34,4 @@ func LoadProxies() []string {
 		proxies = append(proxies, scanner.Text())
 	}
 	return proxies
-}
-
-func Proxy() (func(*http.Request) (*url.URL, error), error) {
-	proxies := LoadProxies()
-	p := proxies[rand.Intn(len(proxies))]
-	proxyUrl, err := url.Parse(p)
-	if err != nil {
-		return nil, err
-	}
-	return http.ProxyURL(proxyUrl), nil
 }
