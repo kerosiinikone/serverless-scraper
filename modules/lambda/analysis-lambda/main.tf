@@ -14,12 +14,12 @@ resource "aws_lambda_function" "analysis-lambda" {
     size = 512
   }
 
-  function_name = "${var.project_name}-analysis-lambda"
+  function_name = "analysis-lambda"
   image_uri     = var.lambda_image_uris["analysis"]
 
   logging_config {
     log_format = "Text"
-    log_group  = "/aws/lambda/${var.project_name}-analysis-lambda"
+    log_group  = "/aws/lambda/analysis-lambda"
   }
 
   memory_size                    = var.lambda_memory_sizes["analysis"]

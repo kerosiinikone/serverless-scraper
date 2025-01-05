@@ -5,3 +5,7 @@ cert.cer
 proxy.txt
 
 generated
+.terraform.*
+.terraform
+terraform.tfstate
+terraform.tfstate.*

@@ -36,7 +36,7 @@ POLICY
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/*" # Come back to this
+            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/*"
           ],
           "Sid" : "DynamoDBAccess"
         }
@@ -56,7 +56,7 @@ POLICY
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:${var.project_name}-*"
+            "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:scraper-lambda"
           ],
           "Sid" : "LambdaInvoke"
         }
@@ -119,7 +119,7 @@ POLICY
                   ],
                   "Effect": "Allow",
                   "Resource": [
-                      "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/${var.project_name}-*"
+                      "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/*"
                   ],
                   "Sid": "DynamoDBUpdateItem"
               }
@@ -202,7 +202,7 @@ POLICY
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/${var.project_name}-*"
+            "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/*"
           ],
           "Sid" : "DynamoDBUpdateItem"
         }
@@ -217,7 +217,7 @@ POLICY
       "Statement" : [
         {
           "Action" : [
-            "sqs:SendMessage"
+            "sqs:SendMessage",
           ],
           "Effect" : "Allow",
           "Resource" : [

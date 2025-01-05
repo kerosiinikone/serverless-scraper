@@ -3,39 +3,37 @@ variable "region" {
     default = "eu-north-1"
 }
 
+variable "s3_bucket_name" {
+    type = string
+}
+
 variable "aws_account_id" {
     type = string
 }
 
 variable "project_name" {
     type = string
-    default = "poc"
-}
-
-variable "lambda_image_uris" {
-  type        = map(string)
-  description = "ECR Image URIs for each Lambda function"
-  default = {
-    analysis = ""
-    api_req  = ""
-    scraper  = ""
-  }
+    default = "scraperdev"
 }
 
 variable "lambda_memory_sizes" {
     type = map(number)
+    default = {
+      analysis = 256
+      api_req  = 128
+      scraper  = 256
+    }
 }
 
 variable "lambda_timeouts" {
     type = map(number)
-}
-
-variable "lambda_iam_role_arns" {
-    type = map(string)
+    default = {
+      analysis = 120
+      api_req  = 60
+      scraper  = 120
+    }
 }
 
 variable "openai_api_key" {
   type        = string
-  description = "OpenAI API key for the analysis-lambda"
-  default     = ""
 }

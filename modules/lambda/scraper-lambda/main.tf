@@ -13,12 +13,12 @@ resource "aws_lambda_function" "scraper-lambda" {
     size = 512
   }
 
-  function_name = "${var.project_name}-scraper-lambda"
+  function_name = "scraper-lambda"
   image_uri     = var.lambda_image_uris["scraper"]
 
   logging_config {
     log_format = "Text"
-    log_group  = "/aws/lambda/${var.project_name}-scraper-lambda"
+    log_group  = "/aws/lambda/scraper-lambda"
   }
 
   memory_size                    = var.lambda_memory_sizes["scraper"]

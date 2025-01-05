@@ -4,17 +4,14 @@ variable "project_name" {
 
 variable "s3_bucket_name" {
   type        = string
-  description = "Name of the S3 bucket for Lambda environment variables"
 }
 
 variable "sqs_queue_url" {
   type        = string
-  description = "URL of the SQS queue for Lambda environment variables"
 }
 
 variable "openai_api_key" {
   type        = string
-  description = "OpenAI API key for the analysis-lambda"
   default     = ""
 }
 

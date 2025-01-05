@@ -1,30 +1,39 @@
-resource "aws_api_gateway_rest_api" "go_scraper_api" {
-  name        = "Scraper API Request"
+resource "aws_apigatewayv2_api" "go_scraper_api" {
+  name          = "Scraper API"
+  protocol_type = "HTTP"
 }
 
-resource "aws_api_gateway_resource" "api_resource" {
-  rest_api_id = aws_api_gateway_rest_api.go_scraper_api.id
-  parent_id   = aws_api_gateway_rest_api.go_scraper_api.root_resource_id
-  path_part   = "api-req-lambda"
+resource "aws_apigatewayv2_route" "api_route" {
+  api_id    = aws_apigatewayv2_api.go_scraper_api.id
+  route_key = "POST /api-req-lambda"
+  target    = "integrations/${aws_apigatewayv2_integration.api_integration.id}"
 }
 
-resource "aws_api_gateway_method" "get_resource" {
-  rest_api_id   = aws_api_gateway_rest_api.go_scraper_api.id
-  resource_id   = aws_api_gateway_resource.api_resource.id
-  http_method   = "GET"
-  authorization = "NONE"
+resource "aws_apigatewayv2_integration" "api_integration" {
+  api_id           = aws_apigatewayv2_api.go_scraper_api.id
+  integration_type = "AWS_PROXY"
+  description      = "Integration for the api-req-lambda"
+  integration_method = "POST"
+  integration_uri  = var.lambda_invoke_arn
 }
 
-resource "aws_api_gateway_deployment" "deploy_api" {
-  depends_on = [
-    aws_api_gateway_integration.api_req_lambda_integration,
-  ]
-
-  rest_api_id = aws_api_gateway_rest_api.go_scraper_api.id
+resource "aws_apigatewayv2_deployment" "deploy_api" {
+  api_id      = aws_apigatewayv2_api.go_scraper_api.id
+  description = "dev"
+  depends_on = [aws_apigatewayv2_route.api_route, aws_apigatewayv2_integration.api_integration]
 }
 
-resource "aws_api_gateway_stage" "dev" {
-  deployment_id = aws_api_gateway_deployment.deploy_api.id
-  rest_api_id   = aws_api_gateway_rest_api.go_scraper_api.id
-  stage_name    = "dev"
+resource "aws_apigatewayv2_stage" "default" {
+  api_id = aws_apigatewayv2_api.go_scraper_api.id
+  name = "$default"
+  auto_deploy = true
+  deployment_id = aws_apigatewayv2_deployment.deploy_api.id
+}
+
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.go_scraper_api.execution_arn}/*/*"
 }
