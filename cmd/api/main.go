@@ -58,7 +58,6 @@ func handleAPIRequest(req Request) (Response, error) {
 		return Response{StatusCode: http.StatusInternalServerError, Body: err.Error()}, err
 	}
 
-
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return Response{StatusCode: http.StatusInternalServerError, Body: err.Error()}, err

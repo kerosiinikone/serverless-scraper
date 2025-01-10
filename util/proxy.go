@@ -17,6 +17,9 @@ var proxies []string
 
 func Proxy() (func(*http.Request) (*url.URL, error), error) {
 	proxies := loadProxies()
+	if len(proxies) == 0 {
+		return nil, nil
+	}
 	p := proxies[rand.Intn(len(proxies))]
 	proxyUrl, err := url.Parse(p)
 	if err != nil {

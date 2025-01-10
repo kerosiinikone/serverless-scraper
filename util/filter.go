@@ -28,6 +28,7 @@ func NewAnalyzer() *Analyzer {
 	}
 } 
 
+// Optimize
 func (a *Analyzer) FilterPosts(posts []models.PostContainer, out chan<- models.RedditPostDetails) error {
 	t := trie.New()
 	for _, keyword := range Keywords {

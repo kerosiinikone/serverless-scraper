@@ -23,7 +23,7 @@ func NewBackoffCaller(headers map[string]string, initialBackoff time.Duration, p
 		headers: headers,
 		initialBackoff: initialBackoff,
 		proxy: proxy,
-		maxRetries: 5,
+		maxRetries: 4,
 	}
 	bc.c = &http.Client{
         Transport: &http.Transport{Proxy: proxy},

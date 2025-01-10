@@ -113,7 +113,12 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
     if decrementPageCount() == 0 {
         return nil
     }
-    resp, err := fetchHttpResponse(map[string]string{}, url)
+    reqURL := url
+    if after != "" {
+        reqURL = fmt.Sprintf("%s&after=%s", url, after)
+    }
+    
+    resp, err := fetchHttpResponse(map[string]string{}, reqURL)
     if err != nil {
 		return err
 	}

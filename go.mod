@@ -20,12 +20,16 @@ require (
 require (
 	github.com/DataDog/gostackparse v0.7.0 // indirect
 	github.com/antchfx/xpath v1.3.3 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82 // indirect
 	github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

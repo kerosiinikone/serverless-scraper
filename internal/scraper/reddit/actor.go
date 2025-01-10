@@ -165,7 +165,7 @@ func (s *RedditScraperWorker) extractCommentTree(doc *html.Node) ([]models.Reply
 }
 
 func processHTTPBody(res *http.Response) (*html.Node, error) {
-	body, err := parseBodyIfGzip(res.Body, res)
+	body, err := parseBodyIfGzip(res)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func processHTTPBody(res *http.Response) (*html.Node, error) {
 	return doc, nil
 }
 
-func parseBodyIfGzip(b io.ReadCloser, res *http.Response) ([]byte, error) {
+func parseBodyIfGzip(res *http.Response) ([]byte, error) {
 	var (
 		body []byte
 	)
