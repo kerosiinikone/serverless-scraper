@@ -10,14 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDecrementPageCount(t *testing.T) {
-    pageCount = 6
-    count := decrementPageCount()
-    assert.Equal(t, 5, count)
-    count = decrementPageCount()
-    assert.Equal(t, 4, count)
-}
-
+// Integration test
 func TestScrape(t *testing.T) {
 	req := &scraper.APIRequest{
 		ID:        "123",
@@ -36,6 +29,29 @@ func TestScrape(t *testing.T) {
 	err := rs.Scrape(ctx, req, out)
 	
 	assert.Nil(t, err)
+}
+
+// Unit tests
+func TestDecrementPageCount(t *testing.T) {
+    pageCount = 6
+    count := decrementPageCount()
+    assert.Equal(t, 5, count)
+    count = decrementPageCount()
+    assert.Equal(t, 4, count)
+}
+
+func TestFetchHttpResponse(t *testing.T) {
+	var (
+		headers = map[string]string{}
+		link    = "https://www.reddit.com/r/golang/comments/1hxw1yf/how_many_bottles_of_water_have_you_drunk_today/"
+	)
+	resp, err := fetchHttpResponse(headers, link)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp == nil {
+		t.Error("Response is nil")
+	}
 }
 
 func TestProcessAndDispatchPost(t *testing.T) {

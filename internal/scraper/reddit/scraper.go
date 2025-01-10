@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"net/http"
 	"sync"
 	"time"
 
@@ -117,7 +118,7 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
     if after != "" {
         reqURL = fmt.Sprintf("%s&after=%s", url, after)
     }
-    
+
     resp, err := fetchHttpResponse(map[string]string{}, reqURL)
     if err != nil {
 		return err
@@ -136,6 +137,22 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
     }
     
     return nil
+}
+
+func fetchHttpResponse(headers Headers, url string) (*http.Response, error) {
+	var res *http.Response
+	
+	proxy, err := util.Proxy()
+	if err != nil {
+		return nil, err
+	}
+	bc := util.NewBackoffCaller(headers, initialBackoff, proxy)
+	res, err = bc.Call(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (rs *RedditScraper) sendQueueMessage(request *scraper.APIRequest) error {

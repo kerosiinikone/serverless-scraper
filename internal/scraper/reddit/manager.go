@@ -43,11 +43,15 @@ func (m *Manager) Receive(ctx *actor.Context) {
 				ctx.Engine().Poison(ctx.PID())
 			}
 		}
-		m.resetTimer(ctx)
+		m.resetTimer(func() error {
+			close(m.finished)
+			ctx.Engine().Poison(ctx.PID())
+			return nil
+		})
 	}
 }
 
-func (m * Manager) resetTimer(ctx *actor.Context) {
+func (m *Manager) resetTimer(fn func() error) {
 	if m.timerStopped {
 		return
 	}
@@ -56,8 +60,9 @@ func (m * Manager) resetTimer(ctx *actor.Context) {
 	}
 	m.timer = time.AfterFunc(8*time.Second, func() {
 		m.timerStopped = true 
-		close(m.finished)
-		ctx.Engine().Poison(ctx.PID())
+		if err := fn(); err != nil {
+			fmt.Println("Failed to reset timer:", err)
+		}
 	})
 }
 

@@ -74,22 +74,6 @@ func (s *RedditScraperWorker) Scrape(ctx *actor.Context) (models.ForumTree, erro
 	}, nil
 }
 
-func fetchHttpResponse(headers Headers, url string) (*http.Response, error) {
-	var res *http.Response
-	
-	proxy, err := util.Proxy()
-	if err != nil {
-		return nil, err
-	}
-	bc := util.NewBackoffCaller(headers, initialBackoff, proxy)
-	res, err = bc.Call(url)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
 func (s *RedditScraperWorker) handleError(ctx *actor.Context, err error) {
 	fmt.Println(err)
 	ctx.Send(s.Mpid, models.ForumTree{})
