@@ -26,21 +26,24 @@ type RedditScraper struct {
 	s *s3manager.Uploader
     q *sqs.SQS
     a *util.Analyzer
+    cb func(*scraper.APIRequest) error
 }
 
 var (
-    pageCount = 6
+    pageCount = 1
     initialBackoff = time.Second
 	mu sync.Mutex
 )
 
 func New(cfg *scraper.Config, storage *s3manager.Uploader, queue *sqs.SQS) RedditScraper {
-	return RedditScraper{
+	rs := RedditScraper{
 		cfg: cfg,
 		s: storage,
 		q: queue,
         a: util.NewAnalyzer(),
 	}
+    rs.cb = rs.sendQueueMessage
+    return rs
 }
 
 func (rs *RedditScraper) Scrape(ctx context.Context, request *scraper.APIRequest, out chan struct{}) error {
@@ -59,6 +62,7 @@ func (rs *RedditScraper) Scrape(ctx context.Context, request *scraper.APIRequest
     go func() {
         if err := rs.requestAndPipePost(apiURL, "", pipe); err != nil {
             log.Println("Error requesting and piping: ", err)
+            close(out)
         }
     }()
 
@@ -69,39 +73,39 @@ func (rs *RedditScraper) acceptLoop(ctx context.Context, pipe chan models.Reddit
     for {
         select {
         case post := <-pipe:
+            log.Println("Processed post: ", post)
             if err := rs.processAndDispatchPost(post, managerPID, engine) ; err != nil {
-                // Continue to next post if processing fails -> do not return
                 log.Println("Failed to process post: ", err)
             }
         case <-finished:
-            err := rs.sendQueueMessage(request)
-            if err != nil {
-                return fmt.Errorf("Failed to send queue message: %w", err)
-            }
-            close(out)
-            return nil
+            return rs.Close(out, request)
         case <-ctx.Done():
-            err := rs.sendQueueMessage(request)
-            if err != nil {
-                return fmt.Errorf("Failed to send queue message: %w", err)
-            }
-            close(out)
-            return nil
+            return rs.Close(out, request)
         }
     }
 }
 
+func (rs *RedditScraper) Close(out chan struct{}, r *scraper.APIRequest) error {
+    err := rs.cb(r)
+    if err != nil {
+        return err
+    }
+    close(out)
+    return nil
+}
+
 func (rs *RedditScraper) processAndDispatchPost(post models.RedditPostDetails, managerPID *actor.PID, engine *actor.Engine) error {
     reg, err := regexp.Compile("[^a-zA-Z0-9\\s]+|\\n")
-
     if err != nil {
         return fmt.Errorf("failed to compile regex: %w", err)
     }
+
     engine.Send(managerPID, models.RedditPostDetails{
         Id:        post.Id,
         Title:     reg.ReplaceAllString(post.Title, ""),
         Subreddit: post.Subreddit,
     })
+
     delay := time.Duration(rand.Intn(rs.cfg.DelayMax-rs.cfg.DelayMin) + rs.cfg.DelayMin)
     time.Sleep(time.Second * delay)
 
@@ -111,14 +115,10 @@ func (rs *RedditScraper) processAndDispatchPost(post models.RedditPostDetails, m
 func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<- models.RedditPostDetails) error {
     var response models.RedditPostResponse
 
-    if decrementPageCount() == 0 {
-        return nil
-    }
     reqURL := url
     if after != "" {
         reqURL = fmt.Sprintf("%s&after=%s", url, after)
     }
-
     resp, err := fetchHttpResponse(map[string]string{}, reqURL)
     if err != nil {
 		return err
@@ -127,14 +127,19 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
     if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
         return fmt.Errorf("failed to decode response: %w", err)
     }
-    go func() {
-        if err := rs.requestAndPipePost(url, response.Data.After, out); err != nil {
-            log.Println("Error requesting and piping: ", err)
-        }
-    }()
+
+    if pageCount > 0 {
+        go func() {
+            if err := rs.requestAndPipePost(url, response.Data.After, out); err != nil {
+                log.Println("Error requesting and piping: ", err)
+            }
+        }()
+    }
     if err := rs.a.FilterPosts(response.Data.Children, out); err != nil {
         return fmt.Errorf("failed to filter posts: %w", err)
     }
+
+    decrementPageCount()
     
     return nil
 }
@@ -162,9 +167,8 @@ func (rs *RedditScraper) sendQueueMessage(request *scraper.APIRequest) error {
     })
 }
 
-func decrementPageCount() int {
+func decrementPageCount() {
     mu.Lock()
     defer mu.Unlock()
     pageCount = int(math.Max(0, float64(pageCount-1)))
-    return pageCount
 }

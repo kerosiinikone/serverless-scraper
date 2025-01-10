@@ -3,41 +3,60 @@ package reddit
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/anthdm/hollywood/actor"
 	"github.com/kerosiinikone/serverless-scraper/internal/scraper"
 	"github.com/kerosiinikone/serverless-scraper/pkg/models"
+	"github.com/kerosiinikone/serverless-scraper/util"
 	"github.com/stretchr/testify/assert"
 )
 
 // Integration test
 func TestScrape(t *testing.T) {
+	var list []*scraper.APIRequest
+
 	req := &scraper.APIRequest{
 		ID:        "123",
 		ClientID:  "123",
 		Subreddit: "golang",
 	}
-	rs := New(&scraper.Config{
-		MaxDepth: 10,
-		DelayMax: 10,
-		DelayMin: 5,
-	}, nil, nil)
+	rs := &RedditScraper{
+		cfg: &scraper.Config{
+			MaxDepth: 2,
+			DelayMax: 2,
+			DelayMin: 1,
+		},
+		cb: func(*scraper.APIRequest) error {
+			list = append(list, req)
+			return nil
+		},
+		a: util.NewAnalyzer(),
+	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	
 	out := make(chan struct{})
 
 	err := rs.Scrape(ctx, req, out)
-	
-	assert.Nil(t, err)
+
+	select {
+	case <-ctx.Done():
+		assert.Nil(t, err)
+	}
+	if len(list) == 0 {
+		t.Error("Request list is empty, scraper failed")
+	}
 }
 
 // Unit tests
 func TestDecrementPageCount(t *testing.T) {
     pageCount = 6
-    count := decrementPageCount()
-    assert.Equal(t, 5, count)
-    count = decrementPageCount()
-    assert.Equal(t, 4, count)
+    decrementPageCount()
+    assert.Equal(t, 5, pageCount)
+    decrementPageCount()
+    assert.Equal(t, 4, pageCount)
 }
 
 func TestFetchHttpResponse(t *testing.T) {

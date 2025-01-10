@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"log"
 	"testing"
 	"time"
 
@@ -42,7 +41,6 @@ func TestFilter(t *testing.T) {
 
 		select {
 			case p := <-out: 
-				log.Println(p)
 				if p.Title != randomKeyword {
 					t.Error("FilterPosts returned the wrong post")
 				}
