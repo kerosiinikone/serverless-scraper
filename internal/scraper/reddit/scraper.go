@@ -108,25 +108,15 @@ func (rs *RedditScraper) processAndDispatchPost(post models.RedditPostDetails, m
 }
 
 func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<- models.RedditPostDetails) error {
-    var (
-        response models.RedditPostResponse
-    ) 
+    var response models.RedditPostResponse
+
     if decrementPageCount() == 0 {
         return nil
     }
-    proxy, err := util.Proxy()
+    resp, err := fetchHttpResponse(map[string]string{}, url)
     if err != nil {
-        return fmt.Errorf("failed to get proxy: %w", err)
-    }
-    bc := util.NewBackoffCaller(map[string]string{}, initialBackoff, proxy)
-    reqURL := url
-    if after != "" {
-        reqURL = fmt.Sprintf("%s&after=%s", url, after)
-    }
-    resp, err := bc.Call(reqURL)
-    if err != nil {
-        return fmt.Errorf("failed to call and backoff: %w", err)
-    }
+		return err
+	}
     defer resp.Body.Close()
     if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
         return fmt.Errorf("failed to decode response: %w", err)
@@ -136,12 +126,10 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
             log.Println("Error requesting and piping: ", err)
         }
     }()
-    start := time.Now()
     if err := rs.a.FilterPosts(response.Data.Children, out); err != nil {
         return fmt.Errorf("failed to filter posts: %w", err)
     }
-    log.Println("Time taken to filter: ", time.Since(start))
-
+    
     return nil
 }
 

@@ -39,26 +39,25 @@ func init() {
 }
 
 func handleAPIRequest(req Request) (Response, error) {
-    lambdaClient := lambdaService.New(sess)
+    var (
+		payload scraper.APIRequest
+		lambdaClient = lambdaService.New(sess)
+	)
 
 	rId := uuid.New().String()
-	cId := "1"
+	if err := json.Unmarshal([]byte(req.Body), &payload); err != nil {
+		return Response{StatusCode: http.StatusBadRequest, Body: err.Error()}, err
+	}
+	payload.ID = rId
 
 	// Separate AWS logic from handlers
 	if err := database.CreateTable(db); err != nil {
 		return Response{StatusCode: http.StatusInternalServerError, Body: err.Error()}, err
 	}
-	if err := database.CreateEmptyItem(db, rId, cId); err != nil {
+	if err := database.CreateEmptyItem(db, payload.ID, payload.ClientID); err != nil {
 		return Response{StatusCode: http.StatusInternalServerError, Body: err.Error()}, err
 	}
 
-	// Get the request body -> mocked
-	// Multiple requests / subreddits?
-	payload := scraper.APIRequest{
-		ClientID: cId,
-		Subreddit: "Dogowners",
-		ID: rId,
-	}
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {

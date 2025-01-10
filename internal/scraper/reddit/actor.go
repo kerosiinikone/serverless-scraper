@@ -48,7 +48,7 @@ func (s *RedditScraperWorker) Scrape(ctx *actor.Context) (models.ForumTree, erro
 	var (
 		res *http.Response
 	)
-	res, err := s.fetchHttpResponse()
+	res, err := fetchHttpResponse(getHeaders(s.Post.Subreddit), s.createPostLink())
 	if err != nil {
 		return models.ForumTree{}, err
 	}
@@ -74,17 +74,13 @@ func (s *RedditScraperWorker) Scrape(ctx *actor.Context) (models.ForumTree, erro
 	}, nil
 }
 
-func (s *RedditScraperWorker) fetchHttpResponse() (*http.Response, error) {
-	var (
-		res *http.Response
-		headers = getHeaders(s.Post.Subreddit)
-		url = s.createPostLink()
-	)
+func fetchHttpResponse(headers Headers, url string) (*http.Response, error) {
+	var res *http.Response
+	
 	proxy, err := util.Proxy()
 	if err != nil {
 		return nil, err
 	}
-
 	bc := util.NewBackoffCaller(headers, initialBackoff, proxy)
 	res, err = bc.Call(url)
 	if err != nil {
