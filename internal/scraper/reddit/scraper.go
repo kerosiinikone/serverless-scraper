@@ -128,7 +128,7 @@ func (rs *RedditScraper) requestAndPipePost(url string, after string, out chan<-
         return fmt.Errorf("failed to decode response: %w", err)
     }
 
-    if pageCount > 0 {
+    if pageCount > 1 {
         go func() {
             if err := rs.requestAndPipePost(url, response.Data.After, out); err != nil {
                 log.Println("Error requesting and piping: ", err)
