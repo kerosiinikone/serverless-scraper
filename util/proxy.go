@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"golang.org/x/exp/rand"
@@ -31,6 +32,9 @@ func Proxy() (func(*http.Request) (*url.URL, error), error) {
 func loadProxies() []string {
 	if len(proxies) != 0 {
 		return proxies
+	}
+	if os.Getenv("TEST_PROXY") != "" {
+		return []string{os.Getenv("TEST_PROXY")}
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(proxyData)))
 	for scanner.Scan() {

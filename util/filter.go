@@ -36,17 +36,17 @@ func (a *Analyzer) FilterPosts(posts []models.PostContainer, out chan<- models.R
 	}
 	outerLoop:
 	for _, post := range posts {
+		p := post.Post
 		if maxDatapoints == 0 {
 			break
 		}
 		foundKeywords := make(map[string]bool)
-		p := post.Post
 		for fk := range Filter {
 			if strings.Contains(p.Title, Filter[fk]) || strings.Contains(p.Selftext, Filter[fk]) {
 				continue outerLoop
 			}
 		}
-		words := strings.Fields(post.Post.Selftext + " " + post.Post.Title)
+		words := strings.Fields(p.Selftext + " " + p.Title)
 		for _, word := range words {
 			if t.HasKeysWithPrefix(word) {
 				for _, k := range t.PrefixSearch(strings.ToLower(word)) {
