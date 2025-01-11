@@ -7,13 +7,21 @@ import (
 
 func TestCaller(t *testing.T) {
 	t.Run("Test NewBackoffCaller", func(t *testing.T) {
-		bc := NewBackoffCaller(map[string]string{"User-Agent": "test"}, 1, nil)
+		p, err := Proxy()
+		if err != nil {
+			t.Errorf("Proxy returned error: %v", err)
+		}
+		bc := NewBackoffCaller(map[string]string{}, 1, p)
 		if bc == nil {
 			t.Error("NewBackoffCaller returned nil")
 		}
 	})
 	t.Run("Test Call", func(t *testing.T) {
-		bc := NewBackoffCaller(map[string]string{"User-Agent": "test"}, 1, nil)
+		p, err := Proxy()
+		if err != nil {
+			t.Errorf("Proxy returned error: %v", err)
+		}
+		bc := NewBackoffCaller(map[string]string{}, 1, p)
 		resp, err := bc.Call("https://www.google.com")
 		if err != nil {
 			t.Errorf("Call returned error: %v", err)
@@ -23,7 +31,11 @@ func TestCaller(t *testing.T) {
 		}
 	})
 	t.Run("Test Call with Backoffs", func(t *testing.T) {
-		bc := NewBackoffCaller(map[string]string{"User-Agent": "test"}, 1, nil)
+		p, err := Proxy()
+		if err != nil {
+			t.Errorf("Proxy returned error: %v", err)
+		}
+		bc := NewBackoffCaller(map[string]string{}, 1, p)
 		start := time.Now()
 		resp, err := bc.Call("https://httpstat.us/429")
 		if err == nil {

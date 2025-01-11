@@ -33,7 +33,7 @@ func TestScrape_Actor(t *testing.T) {
 func TestProcessHTTPBody(t *testing.T) {
 	var (
 		headers = map[string]string{}
-		link    = "https://www.reddit.com/r/golang/comments/1hxw1yf/how_many_bottles_of_water_have_you_drunk_today/"
+		link    = "https://old.reddit.com/r/golang/comments/1hxw1yf/how_many_bottles_of_water_have_you_drunk_today/"
 	)
 	resp, err := fetchHttpResponse(headers, link)
 	if err != nil {

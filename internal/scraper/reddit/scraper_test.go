@@ -62,7 +62,7 @@ func TestDecrementPageCount(t *testing.T) {
 func TestFetchHttpResponse(t *testing.T) {
 	var (
 		headers = map[string]string{}
-		link    = "https://www.reddit.com/r/golang/comments/1hxw1yf/how_many_bottles_of_water_have_you_drunk_today/"
+		link    = "https://old.reddit.com/r/golang/comments/1hxw1yf/how_many_bottles_of_water_have_you_drunk_today/"	
 	)
 	resp, err := fetchHttpResponse(headers, link)
 	if err != nil {
@@ -87,7 +87,9 @@ func TestProcessAndDispatchPost(t *testing.T) {
     managerPID := engine.Spawn(NewManager(nil, nil, rs.s), "manager")
 
 	post := models.RedditPostDetails{
-		Id: "123",
+		Id: "1hxw1yf",
+		Subreddit: "golang",
+		Title: "How Many Bottles of Water Have You Drunk Today?",
 	}
 
 	err = rs.processAndDispatchPost(post, managerPID, engine)
@@ -103,7 +105,7 @@ func TestRequestAndPipePost(t *testing.T) {
 	}, nil, nil)
 
 	pipe := make(chan models.RedditPostDetails)
-	apiURL := "https://www.reddit.com/r/golang.json?limit=10"
+	apiURL := "https://old.reddit.com/r/golang.json?limit=10"
 
 	err := rs.requestAndPipePost(apiURL, "", pipe)
 
