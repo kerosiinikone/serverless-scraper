@@ -66,6 +66,7 @@ func (m *Manager) resetTimer(fn func() error) {
 	})
 }
 
+// Mock the storage in case of tests -> otherwise the manager will try to save the file to S3 and fail
 func (m *Manager) storePost(msg models.ForumTree) error {
 	d := models.DataEntry{
 		Post:      msg,
