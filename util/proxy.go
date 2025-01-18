@@ -12,7 +12,7 @@ import (
 )
 
 //go:embed data/proxy.txt
-var proxyData []byte 
+var proxyData []byte
 
 var proxies []string
 

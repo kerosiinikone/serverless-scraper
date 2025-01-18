@@ -26,35 +26,35 @@ func NewDownloader(s *session.Session) *s3manager.Downloader {
 }
 
 func RetrieveFiles(svc *s3.S3, downloader *s3manager.Downloader, cid string, rid string) ([]models.DataEntry, error) {
-    var (
-        d []models.DataEntry
-        dataEntry models.DataEntry
-    )
+	var (
+		d         []models.DataEntry
+		dataEntry models.DataEntry
+	)
 
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{
-        Bucket: aws.String(bucketName()),
-        Prefix: aws.String(pathToFile(cid, rid, "")),
-    })
-    if err != nil {
-        return nil, err
-    }
-    for _, item := range resp.Contents {
-        b := &aws.WriteAtBuffer{}
-        _, err := downloader.Download(b, &s3.GetObjectInput{
-            Bucket: aws.String(bucketName()),
-            Key:    item.Key,
-        })
-        if err != nil {
-            return nil, err
-        }
-        err = json.Unmarshal(b.Bytes(), &dataEntry)
-        if err != nil {
-            return nil, err
-        }
-        d = append(d, dataEntry)
-    }
+		Bucket: aws.String(bucketName()),
+		Prefix: aws.String(pathToFile(cid, rid, "")),
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range resp.Contents {
+		b := &aws.WriteAtBuffer{}
+		_, err := downloader.Download(b, &s3.GetObjectInput{
+			Bucket: aws.String(bucketName()),
+			Key:    item.Key,
+		})
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(b.Bytes(), &dataEntry)
+		if err != nil {
+			return nil, err
+		}
+		d = append(d, dataEntry)
+	}
 
-    return d, nil
+	return d, nil
 }
 
 func SaveFile(u *s3manager.Uploader, d models.DataEntry) error {
@@ -63,20 +63,20 @@ func SaveFile(u *s3manager.Uploader, d models.DataEntry) error {
 		return err
 	}
 	_, err = u.Upload(&s3manager.UploadInput{
-        Bucket: aws.String(bucketName()),
-        Key:    aws.String(pathToFile(d.ClientID, d.RequestID, d.Post.Id)),
-        Body:   bytes.NewReader(jsonData),
-    })
-    if err != nil {
-        return err
-    }
+		Bucket: aws.String(bucketName()),
+		Key:    aws.String(pathToFile(d.ClientID, d.RequestID, d.Post.Id)),
+		Body:   bytes.NewReader(jsonData),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func pathToFile(cId, rId, pId string) string {
-    return fmt.Sprintf("client-%s/request-%s/post-%s", cId, rId, pId)
+	return fmt.Sprintf("client-%s/request-%s/post-%s", cId, rId, pId)
 }
 
 func bucketName() string {
-    return os.Getenv("AWS_BUCKET")
+	return os.Getenv("AWS_BUCKET")
 }

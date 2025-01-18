@@ -60,14 +60,14 @@ Before you begin cloning the repo, ensure you have met the following requirement
 
 3.  **Create a new ECR repo:**
 
-    Create a new repo in your AWS ECR. Use the repo name as `PROJECT_NAME` in the Makefile and Terraform setup.
+    Create a new repo in your AWS ECR. Use the repo name as `PROJECT_NAME` in the Makefile and Terraform setup. Remember to also login locally (view push commands).
 
 4.  **Build the Docker Images (Makefile):**
 
     Build the Docker images for each Lambda function with the provided Makefile:
 
     ```bash
-    make
+    make PROJECT_NAME=foo AWS_ACCOUNT=bar
     ```
 
 5.  **Deploy with Terraform:**

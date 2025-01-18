@@ -1,8 +1,8 @@
-FROM golang:1.23.2 as build
+FROM golang:1.23.2 AS build
 
 WORKDIR /api
-
-COPY . .
+ 
+COPY . . 
 
 RUN go build -tags lambda.norpc -o main ./cmd/api/main.go
 

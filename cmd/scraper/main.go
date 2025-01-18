@@ -21,18 +21,17 @@ import (
 	"github.com/kerosiinikone/serverless-scraper/internal/scraper/reddit"
 )
 
-
 const (
-	delayMax = 2
-    delayMin = 1
-    maxDepth = 100
+	delayMax = 4
+	delayMin = 2
+	maxDepth = 100
 )
 
 var (
-    storage *s3manager.Uploader
-    sess 	*session.Session
-    q 		*sqs.SQS
-	db 		*dynamodb.DynamoDB
+	storage *s3manager.Uploader
+	sess    *session.Session
+	q       *sqs.SQS
+	db      *dynamodb.DynamoDB
 )
 
 func init() {
@@ -41,20 +40,20 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	sess := infra.New(nil)
+	sess = infra.New(nil)
 	storage = blob.NewUploader(sess)
-    q = queue.New(sess)
+	q = queue.New(sess)
 	db = database.New(sess)
 }
 
 func handleScrape(ctx context.Context, event json.RawMessage) error {
 	var (
-		c = make(chan struct{})
+		c      = make(chan struct{})
 		failed = make(chan error)
-		input scraper.APIRequest
+		input  scraper.APIRequest
 	)
-	
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(2 * time.Minute))
+
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(2*time.Minute))
 	defer cancel()
 
 	cfg := &scraper.Config{
@@ -78,9 +77,9 @@ func handleScrape(ctx context.Context, event json.RawMessage) error {
 	}()
 
 	select {
-	case <- c:
+	case <-c:
 		log.Println("Finished scraping")
-	case fail := <- failed:
+	case fail := <-failed:
 		if err := database.SetStatusFailed(db, input.ID, input.ClientID); err != nil {
 			return err
 		}

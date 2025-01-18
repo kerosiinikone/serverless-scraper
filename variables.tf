@@ -13,7 +13,6 @@ variable "aws_account_id" {
 
 variable "project_name" {
     type = string
-    default = "scraperdev"
 }
 
 variable "lambda_memory_sizes" {
